@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-
 package com.android.common.userhappiness;
 
 import android.content.Intent;
@@ -23,6 +7,10 @@ import com.android.common.speech.LoggingEvents;
 /**
  * Metrics for User Happiness are recorded here. Each app can define when to
  * call these User Happiness metrics.
+ *
+ * This means, each time the user says something and we guess correctly what he said
+ * (because he clicks the search/accepts our sentence, we log this information
+ * so that the system knows and handles it
  */
 public class UserHappinessSignals {
     // So that we don't send logging events to VoiceSearch when there is nothing to

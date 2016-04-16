@@ -39,7 +39,7 @@ public class EditingUtil {
     private static Method sMethodGetSelectedText;
     private static Method sMethodSetComposingRegion;
 
-    private EditingUtil() {};
+    private EditingUtil() {}
 
     /**
      * Append newText to the text field represented by connection.

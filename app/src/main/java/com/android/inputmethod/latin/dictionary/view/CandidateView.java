@@ -14,8 +14,9 @@
  * the License.
  */
 
-package com.android.inputmethod.latin;
+package com.android.inputmethod.latin.dictionary.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -38,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.android.inputmethod.latin.LatinIME;
+import com.android.inputmethod.latin.TextEntryState;
 import com.moo.android.inputmethod.latin.free.R;
 
 public class CandidateView extends View {
@@ -46,7 +49,7 @@ public class CandidateView extends View {
     private static final int OUT_OF_BOUNDS_X_COORD = -1;
 
     private LatinIME mService;
-    private final ArrayList<CharSequence> mSuggestions = new ArrayList<CharSequence>();
+    private final ArrayList<CharSequence> mSuggestions = new ArrayList<>();
     private boolean mShowingCompletions;
     private CharSequence mSelectedString;
     private int mSelectedIndex;
@@ -207,19 +210,19 @@ public class CandidateView extends View {
      */
     @Override
     protected void onDraw(Canvas canvas) {
-        if (canvas != null) {
+        if (canvas != null)
             super.onDraw(canvas);
-        }
+
         mTotalWidth = 0;
         
         final int height = getHeight();
         if (mBgPadding == null) {
             mBgPadding = new Rect(0, 0, 0, 0);
-            if (getBackground() != null) {
+
+            if (getBackground() != null)
                 getBackground().getPadding(mBgPadding);
-            }
-            mDivider.setBounds(0, 0, mDivider.getIntrinsicWidth(),
-                    mDivider.getIntrinsicHeight());
+
+            mDivider.setBounds(0, 0, mDivider.getIntrinsicWidth(), mDivider.getIntrinsicHeight());
         }
 
         final int count = mSuggestions.size();
@@ -250,6 +253,7 @@ public class CandidateView extends View {
                 // there are multiple suggestions, such as the default punctuation list.
                 paint.setColor(mColorOther);
             }
+
             int wordWidth;
             if ((wordWidth = mWordWidth[i]) == 0) {
                 float textWidth =  paint.measureText(suggestion, 0, wordLength);
@@ -286,13 +290,14 @@ public class CandidateView extends View {
         }
         mService.onAutoCompletionStateChanged(existsAutoCompletion);
         mTotalWidth = x;
-        if (mTargetScrollX != scrollX) {
+
+        if (mTargetScrollX != scrollX)
             scrollToTarget();
-        }
     }
     
     private void scrollToTarget() {
         int scrollX = getScrollX();
+
         if (mTargetScrollX > scrollX) {
             scrollX += SCROLL_PIXELS;
             if (scrollX >= mTargetScrollX) {
@@ -312,12 +317,15 @@ public class CandidateView extends View {
                 scrollTo(scrollX, getScrollY());
             }
         }
+
         invalidate();
     }
-    
+
+    @SuppressLint("WrongCall")
     public void setSuggestions(List<CharSequence> suggestions, boolean completions,
             boolean typedWordValid, boolean haveMinimalSuggestion) {
         clear();
+
         if (suggestions != null) {
             int insertCount = Math.min(suggestions.size(), MAX_SUGGESTIONS);
             for (CharSequence suggestion : suggestions) {
@@ -326,13 +334,17 @@ public class CandidateView extends View {
                     break;
             }
         }
+
         mShowingCompletions = completions;
         mTypedWordValid = typedWordValid;
+
         scrollTo(0, getScrollY());
         mTargetScrollX = 0;
+
         mHaveMinimalSuggestion = haveMinimalSuggestion;
         // Compute the total width
         onDraw(null);
+
         invalidate();
         requestLayout();
     }
@@ -350,12 +362,15 @@ public class CandidateView extends View {
     }
 
     public boolean dismissAddToDictionaryHint() {
-        if (!mShowingAddToDictionary) return false;
+        if (!mShowingAddToDictionary)
+            return false;
+
         clear();
+
         return true;
     }
 
-    /* package */ List<CharSequence> getSuggestions() {
+    public List<CharSequence> getSuggestions() {
         return mSuggestions;
     }
 
@@ -364,20 +379,21 @@ public class CandidateView extends View {
         // in LatinIME.pickSuggestionManually().
         mSuggestions.clear();
         mTouchX = OUT_OF_BOUNDS_X_COORD;
+
         mSelectedString = null;
         mSelectedIndex = -1;
         mShowingAddToDictionary = false;
+
         invalidate();
+
         Arrays.fill(mWordWidth, 0);
         Arrays.fill(mWordX, 0);
     }
     
     @Override
     public boolean onTouchEvent(MotionEvent me) {
-
-        if (mGestureDetector.onTouchEvent(me)) {
+        if (mGestureDetector.onTouchEvent(me))
             return true;
-        }
 
         int action = me.getAction();
         int x = (int) me.getX();
@@ -385,49 +401,53 @@ public class CandidateView extends View {
         mTouchX = x;
 
         switch (action) {
-        case MotionEvent.ACTION_DOWN:
-            invalidate();
-            break;
-        case MotionEvent.ACTION_MOVE:
-            if (y <= 0) {
-                // Fling up!?
-                if (mSelectedString != null) {
-                    // If there are completions from the application, we don't change the state to
-                    // STATE_PICKED_SUGGESTION
-                    if (!mShowingCompletions) {
-                        // This "acceptedSuggestion" will not be counted as a word because
-                        // it will be counted in pickSuggestion instead.
-                        TextEntryState.acceptedSuggestion(mSuggestions.get(0),
-                                mSelectedString);
-                    }
-                    mService.pickSuggestionManually(mSelectedIndex, mSelectedString);
-                    mSelectedString = null;
-                    mSelectedIndex = -1;
-                }
-            }
-            break;
-        case MotionEvent.ACTION_UP:
-            if (!mScrolled) {
-                if (mSelectedString != null) {
-                    if (mShowingAddToDictionary) {
-                        longPressFirstWord();
-                        clear();
-                    } else {
+            case MotionEvent.ACTION_DOWN:
+                invalidate();
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (y <= 0) {
+                    // Fling up!?
+                    if (mSelectedString != null) {
+                        // If there are completions from the application, we don't change the state to
+                        // STATE_PICKED_SUGGESTION
                         if (!mShowingCompletions) {
+                            // This "acceptedSuggestion" will not be counted as a word because
+                            // it will be counted in pickSuggestion instead.
                             TextEntryState.acceptedSuggestion(mSuggestions.get(0),
                                     mSelectedString);
                         }
                         mService.pickSuggestionManually(mSelectedIndex, mSelectedString);
+                        mSelectedString = null;
+                        mSelectedIndex = -1;
                     }
                 }
-            }
-            mSelectedString = null;
-            mSelectedIndex = -1;
-            requestLayout();
-            hidePreview();
-            invalidate();
-            break;
+                break;
+
+            case MotionEvent.ACTION_UP:
+                if (!mScrolled) {
+                    if (mSelectedString != null) {
+                        if (mShowingAddToDictionary) {
+                            longPressFirstWord();
+                            clear();
+                        } else {
+                            if (!mShowingCompletions) {
+                                TextEntryState.acceptedSuggestion(mSuggestions.get(0),
+                                        mSelectedString);
+                            }
+                            mService.pickSuggestionManually(mSelectedIndex, mSelectedString);
+                        }
+                    }
+                }
+                mSelectedString = null;
+                mSelectedIndex = -1;
+                requestLayout();
+                hidePreview();
+                invalidate();
+                break;
+
         }
+
         return true;
     }
 
@@ -441,24 +461,29 @@ public class CandidateView extends View {
         int oldWordIndex = mCurrentWordIndex;
         mCurrentWordIndex = wordIndex;
         // If index changed or changing text
+
         if (oldWordIndex != mCurrentWordIndex || altText != null) {
-            if (wordIndex == OUT_OF_BOUNDS_WORD_INDEX) {
+            if (wordIndex == OUT_OF_BOUNDS_WORD_INDEX)
                 hidePreview();
-            } else {
+            else {
                 CharSequence word = altText != null? altText : mSuggestions.get(wordIndex);
                 mPreviewText.setText(word);
                 mPreviewText.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 
                         MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+
                 int wordWidth = (int) (mPaint.measureText(word, 0, word.length()) + X_GAP * 2);
                 final int popupWidth = wordWidth
                         + mPreviewText.getPaddingLeft() + mPreviewText.getPaddingRight();
                 final int popupHeight = mPreviewText.getMeasuredHeight();
                 //mPreviewText.setVisibility(INVISIBLE);
+
                 mPopupPreviewX = mWordX[wordIndex] - mPreviewText.getPaddingLeft() - getScrollX()
                         + (mWordWidth[wordIndex] - wordWidth) / 2;
                 mPopupPreviewY = - popupHeight;
+
                 int [] offsetInWindow = new int[2];
                 getLocationInWindow(offsetInWindow);
+
                 if (mPreviewPopup.isShowing()) {
                     mPreviewPopup.update(mPopupPreviewX, mPopupPreviewY + offsetInWindow[1], 
                             popupWidth, popupHeight);
@@ -468,6 +493,7 @@ public class CandidateView extends View {
                     mPreviewPopup.showAtLocation(this, Gravity.NO_GRAVITY, mPopupPreviewX, 
                             mPopupPreviewY + offsetInWindow[1]);
                 }
+
                 mPreviewText.setVisibility(VISIBLE);
             }
         }
@@ -486,4 +512,5 @@ public class CandidateView extends View {
         super.onDetachedFromWindow();
         hidePreview();
     }
+
 }

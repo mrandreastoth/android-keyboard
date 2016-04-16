@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.inputmethod.latin;
+package com.android.inputmethod.latin.dictionary;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -53,12 +53,13 @@ public class ContactsDictionary extends ExpandableDictionary {
         ContentResolver cres = context.getContentResolver();
 
         cres.registerContentObserver(
-                Contacts.CONTENT_URI, true,mObserver = new ContentObserver(null) {
+                Contacts.CONTENT_URI, true, mObserver = new ContentObserver(null) {
                     @Override
                     public void onChange(boolean self) {
                         setRequiresReload(true);
                     }
                 });
+
         loadDictionary();
     }
 
@@ -68,16 +69,14 @@ public class ContactsDictionary extends ExpandableDictionary {
             getContext().getContentResolver().unregisterContentObserver(mObserver);
             mObserver = null;
         }
+
         super.close();
     }
 
     @Override
     public void startDictionaryLoadingTaskLocked() {
-        long now = SystemClock.uptimeMillis();
-        if (mLastLoadedContacts == 0
-                || now - mLastLoadedContacts > 30 * 60 * 1000 /* 30 minutes */) {
+        if (mLastLoadedContacts == 0 || SystemClock.uptimeMillis() - mLastLoadedContacts > 30 * 60 * 1000)
             super.startDictionaryLoadingTaskLocked();
-        }
     }
 
     @Override
@@ -85,9 +84,9 @@ public class ContactsDictionary extends ExpandableDictionary {
         try {
             Cursor cursor = getContext().getContentResolver()
                     .query(Contacts.CONTENT_URI, PROJECTION, null, null, null);
-            if (cursor != null) {
+
+            if (cursor != null)
                 addWords(cursor);
-            }
         } catch(IllegalStateException e) {
             Log.e(TAG, "Contacts DB is having problems");
         }
@@ -98,6 +97,7 @@ public class ContactsDictionary extends ExpandableDictionary {
         clearDictionary();
 
         final int maxWordLength = getMaxWordLength();
+
         try {
             if (cursor.moveToFirst()) {
                 while (!cursor.isAfterLast()) {
@@ -131,8 +131,6 @@ public class ContactsDictionary extends ExpandableDictionary {
                                 if (wordLen < maxWordLength && wordLen > 1) {
                                     super.addWord(word, FREQUENCY_FOR_CONTACTS);
                                     if (!TextUtils.isEmpty(prevWord)) {
-                                        // TODO Do not add email address
-                                        // Not so critical
                                         super.setBigram(prevWord, word,
                                                 FREQUENCY_FOR_CONTACTS_BIGRAM);
                                     }

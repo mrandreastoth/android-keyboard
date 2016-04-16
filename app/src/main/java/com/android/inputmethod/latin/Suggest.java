@@ -27,6 +27,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
+import com.android.inputmethod.latin.dictionary.BinaryDictionary;
+import com.android.inputmethod.latin.dictionary.Dictionary;
+import com.android.inputmethod.latin.dictionary.ExpandableDictionary;
+
 /**
  * This class loads a dictionary and provides a list of suggestions for a given sequence of 
  * characters. This includes corrections and completions.

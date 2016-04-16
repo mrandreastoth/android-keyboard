@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
+import com.android.inputmethod.latin.dictionary.BinaryDictionary;
 import com.moo.android.inputmethod.latin.free.R;
 
 import android.content.SharedPreferences;

@@ -30,6 +30,8 @@ import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import com.android.inputmethod.latin.dictionary.ExpandableDictionary;
+
 /**
  * Stores all the pairs user types in databases. Prune the database if the size
  * gets too big. Unlike AutoDictionary, it even stores the pairs that are already
@@ -48,7 +50,7 @@ public class UserBigramDictionary extends ExpandableDictionary {
      * If this pair is typed 6 times, it would be suggested.
      * Should be smaller than ContactsDictionary.FREQUENCY_FOR_CONTACTS_BIGRAM
      */
-    protected static final int SUGGEST_THRESHOLD = 6 * FREQUENCY_FOR_TYPED;
+    public static final int SUGGEST_THRESHOLD = 6 * FREQUENCY_FOR_TYPED;
 
     /** Maximum number of pairs. Pruning will start when databases goes above this number. */
     private static int sMaxUserBigrams = 10000;

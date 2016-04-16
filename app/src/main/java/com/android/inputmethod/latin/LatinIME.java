@@ -17,6 +17,9 @@
 package com.android.inputmethod.latin;
 
 import com.android.inputmethod.latin.LatinIMEUtil.RingCharBuffer;
+import com.android.inputmethod.latin.dictionary.AutoDictionary;
+import com.android.inputmethod.latin.dictionary.ContactsDictionary;
+import com.android.inputmethod.latin.dictionary.view.CandidateView;
 import com.android.inputmethod.voice.FieldContext;
 import com.android.inputmethod.voice.SettingsUtil;
 import com.android.inputmethod.voice.VoiceInput;
@@ -2409,20 +2412,20 @@ public class LatinIME extends InputMethodService
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_START_TUTORIAL), 500);
     }
 
-    /* package */ void tutorialDone() {
+    public void tutorialDone() {
         mTutorial = null;
     }
 
-    /* package */ void promoteToUserDictionary(String word, int frequency) {
+    public void promoteToUserDictionary(String word, int frequency) {
         if (mUserDictionary.isValidWord(word)) return;
         mUserDictionary.addWord(word, frequency);
     }
 
-    /* package */ WordComposer getCurrentWord() {
+    public WordComposer getCurrentWord() {
         return mWord;
     }
 
-    /* package */ boolean getPopupOn() {
+    public boolean getPopupOn() {
         return mPopupOn;
     }
 

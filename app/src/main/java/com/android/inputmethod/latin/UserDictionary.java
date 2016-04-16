@@ -23,6 +23,8 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.provider.UserDictionary.Words;
 
+import com.android.inputmethod.latin.dictionary.ExpandableDictionary;
+
 public class UserDictionary extends ExpandableDictionary {
     
     private static final String[] PROJECTION = {

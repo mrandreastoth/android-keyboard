@@ -16,7 +16,7 @@
 
 package com.android.inputmethod.latin;
 
-import com.android.inputmethod.latin.Dictionary.DataType;
+import com.android.inputmethod.latin.dictionary.Dictionary.DataType;
 
 import android.content.Context;
 import android.content.SharedPreferences;

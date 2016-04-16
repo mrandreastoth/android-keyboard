@@ -14,7 +14,9 @@
  * the License.
  */
 
-package com.android.inputmethod.latin;
+package com.android.inputmethod.latin.dictionary;
+
+import com.android.inputmethod.latin.WordComposer;
 
 /**
  * Abstract base class for a dictionary that can do a fuzzy search for words based on a set of key
@@ -31,13 +33,13 @@ abstract public class Dictionary {
      */
     protected static final int FULL_WORD_FREQ_MULTIPLIER = 2;
 
-    public static enum DataType {
+    public enum DataType {
         UNIGRAM, BIGRAM
     }
 
     /**
      * Interface to be implemented by classes requesting words to be fetched from the dictionary.
-     * @see #getWords(WordComposer, WordCallback)
+     * @see #getWords(WordComposer, WordCallback, int[])
      */
     public interface WordCallback {
         /**
@@ -65,7 +67,7 @@ abstract public class Dictionary {
      *        word so far. For instance, "bracke" can be followed by "t", so array['t'] will have
      *        a non-zero value on returning from this method. 
      *        Pass in null if you don't want the dictionary to look up next letters.
-     * @see WordCallback#addWord(char[], int, int)
+     * @see WordCallback#addWord(char[], int, int, int, int, DataType)
      */
     abstract public void getWords(final WordComposer composer, final WordCallback callback,
             int[] nextLettersFrequencies);
@@ -81,9 +83,7 @@ abstract public class Dictionary {
      *        Pass in null if you don't want the dictionary to look up next letters.
      */
     public void getBigrams(final WordComposer composer, final CharSequence previousWord,
-            final WordCallback callback, int[] nextLettersFrequencies) {
-        // empty base implementation
-    }
+            final WordCallback callback, int[] nextLettersFrequencies) { }
 
     /**
      * Checks if the given word occurs in the dictionary
@@ -101,20 +101,19 @@ abstract public class Dictionary {
      * @return true if they are the same, false otherwise.
      */
     protected boolean same(final char[] word, final int length, final CharSequence typedWord) {
-        if (typedWord.length() != length) {
+        if (typedWord.length() != length)
             return false;
-        }
-        for (int i = 0; i < length; i++) {
-            if (word[i] != typedWord.charAt(i)) {
+
+        for (int i = 0; i < length; i++)
+            if (word[i] != typedWord.charAt(i))
                 return false;
-            }
-        }
+
         return true;
     }
 
     /**
      * Override to clean up any resources.
      */
-    public void close() {
-    }
+    public void close() {}
+
 }

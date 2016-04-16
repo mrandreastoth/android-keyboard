@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.android.inputmethod.latin;
+package com.android.inputmethod.latin.dictionary;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -28,7 +28,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.AsyncTask;
 import android.provider.BaseColumns;
-import android.util.Log;
+
+import com.android.inputmethod.latin.LatinIME;
 
 /**
  * Stores new words temporarily until they are promoted to the user dictionary
@@ -37,13 +38,14 @@ import android.util.Log;
  * repeatedly will promote it to the user dictionary.
  */
 public class AutoDictionary extends ExpandableDictionary {
+
     // Weight added to a user picking a new word from the suggestion strip
-    static final int FREQUENCY_FOR_PICKED = 3;
+    public static final int FREQUENCY_FOR_PICKED = 3;
     // Weight added to a user typing a new word that doesn't get corrected (or is reverted)
-    static final int FREQUENCY_FOR_TYPED = 1;
+    public static final int FREQUENCY_FOR_TYPED = 1;
     // A word that is frequently typed and gets promoted to the user dictionary, uses this
     // frequency.
-    static final int FREQUENCY_FOR_AUTO_ADD = 250;
+    public static final int FREQUENCY_FOR_AUTO_ADD = 250;
     // If the user touches a typed word 2 times or more, it will become valid.
     private static final int VALIDITY_THRESHOLD = 2 * FREQUENCY_FOR_PICKED;
     // If the user touches a typed word 4 times or more, it will be added to the user dict.
@@ -53,7 +55,7 @@ public class AutoDictionary extends ExpandableDictionary {
     // Locale for which this auto dictionary is storing words
     private String mLocale;
 
-    private HashMap<String,Integer> mPendingWrites = new HashMap<String,Integer>();
+    private HashMap<String,Integer> mPendingWrites = new HashMap<>();
     private final Object mPendingWritesLock = new Object();
 
     private static final String DATABASE_NAME = "auto_dict.db";
@@ -76,7 +78,7 @@ public class AutoDictionary extends ExpandableDictionary {
     private static HashMap<String, String> sDictProjectionMap;
 
     static {
-        sDictProjectionMap = new HashMap<String, String>();
+        sDictProjectionMap = new HashMap<>();
         sDictProjectionMap.put(COLUMN_ID, COLUMN_ID);
         sDictProjectionMap.put(COLUMN_WORD, COLUMN_WORD);
         sDictProjectionMap.put(COLUMN_FREQUENCY, COLUMN_FREQUENCY);
@@ -87,14 +89,15 @@ public class AutoDictionary extends ExpandableDictionary {
 
     public AutoDictionary(Context context, LatinIME ime, String locale, int dicTypeId) {
         super(context, dicTypeId);
+
         mIme = ime;
         mLocale = locale;
-        if (sOpenHelper == null) {
+
+        if (sOpenHelper == null)
             sOpenHelper = new DatabaseHelper(getContext());
-        }
-        if (mLocale != null && mLocale.length() > 1) {
+
+        if (mLocale != null && mLocale.length() > 1)
             loadDictionary();
-        }
     }
 
     @Override
@@ -141,13 +144,15 @@ public class AutoDictionary extends ExpandableDictionary {
     public void addWord(String word, int addFrequency) {
         final int length = word.length();
         // Don't add very short or very long words.
-        if (length < 2 || length > getMaxWordLength()) return;
-        if (mIme.getCurrentWord().isAutoCapitalized()) {
-            // Remove caps before adding
+        if (length < 2 || length > getMaxWordLength())
+            return;
+
+        if (mIme.getCurrentWord().isAutoCapitalized()) // Remove caps before adding
             word = Character.toLowerCase(word.charAt(0)) + word.substring(1);
-        }
+
         int freq = getWordFrequency(word);
         freq = freq < 0 ? addFrequency : freq + addFrequency;
+
         super.addWord(word, freq);
 
         if (freq >= PROMOTION_THRESHOLD) {
@@ -157,7 +162,7 @@ public class AutoDictionary extends ExpandableDictionary {
 
         synchronized (mPendingWritesLock) {
             // Write a null frequency if it is to be deleted from the db
-            mPendingWrites.put(word, freq == 0 ? null : new Integer(freq));
+            mPendingWrites.put(word, freq == 0 ? null : freq);
         }
     }
 
@@ -169,9 +174,9 @@ public class AutoDictionary extends ExpandableDictionary {
             // Nothing pending? Return
             if (mPendingWrites.isEmpty()) return;
             // Create a background thread to write the pending entries
-            new UpdateDbTask(getContext(), sOpenHelper, mPendingWrites, mLocale).execute();
+            new UpdateDbTask(sOpenHelper, mPendingWrites, mLocale).execute();
             // Create a new map for writing new entries into while the old one is written to db
-            mPendingWrites = new HashMap<String, Integer>();
+            mPendingWrites = new HashMap<>();
         }
     }
 
@@ -196,8 +201,6 @@ public class AutoDictionary extends ExpandableDictionary {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w("AutoDictionary", "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
             db.execSQL("DROP TABLE IF EXISTS " + AUTODICT_TABLE_NAME);
             onCreate(db);
         }
@@ -210,8 +213,9 @@ public class AutoDictionary extends ExpandableDictionary {
 
         // Get the database and run the query
         SQLiteDatabase db = sOpenHelper.getReadableDatabase();
-        Cursor c = qb.query(db, null, selection, selectionArgs, null, null,
-                DEFAULT_SORT_ORDER);
+
+        Cursor c = qb.query(db, null, selection, selectionArgs, null, null, DEFAULT_SORT_ORDER);
+
         return c;
     }
 
@@ -224,8 +228,8 @@ public class AutoDictionary extends ExpandableDictionary {
         private final DatabaseHelper mDbHelper;
         private final String mLocale;
 
-        public UpdateDbTask(Context context, DatabaseHelper openHelper,
-                HashMap<String, Integer> pendingWrites, String locale) {
+        public UpdateDbTask(DatabaseHelper openHelper, HashMap<String, Integer> pendingWrites,
+                            String locale) {
             mMap = pendingWrites;
             mLocale = locale;
             mDbHelper = openHelper;
@@ -236,23 +240,28 @@ public class AutoDictionary extends ExpandableDictionary {
             SQLiteDatabase db = mDbHelper.getWritableDatabase();
             // Write all the entries to the db
             Set<Entry<String,Integer>> mEntries = mMap.entrySet();
+
             for (Entry<String,Integer> entry : mEntries) {
                 Integer freq = entry.getValue();
+
                 db.delete(AUTODICT_TABLE_NAME, COLUMN_WORD + "=? AND " + COLUMN_LOCALE + "=?",
                         new String[] { entry.getKey(), mLocale });
-                if (freq != null) {
-                    db.insert(AUTODICT_TABLE_NAME, null,
-                            getContentValues(entry.getKey(), freq, mLocale));
-                }
+
+                if (freq != null)
+                    db.insert(AUTODICT_TABLE_NAME, null, getContentValues(entry.getKey(), freq,
+                            mLocale));
             }
+
             return null;
         }
 
         private ContentValues getContentValues(String word, int frequency, String locale) {
             ContentValues values = new ContentValues(4);
+
             values.put(COLUMN_WORD, word);
             values.put(COLUMN_FREQUENCY, frequency);
             values.put(COLUMN_LOCALE, locale);
+
             return values;
         }
     }
