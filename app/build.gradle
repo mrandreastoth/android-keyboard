@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+    android {
+        compileSdkVersion = 23
+        buildToolsVersion = "23.0.3"
+
+        defaultConfig {
+            applicationId "com.moo.android"
+            minSdkVersion 8
+            targetSdkVersion 23
+            versionCode 1
+            versionName "1.0"
+
+            ndk {
+                moduleName "com_android_inputmethod_latin_BinaryDictionary.cpp"
+                stl "stlport_shared"
+                ldLibs "log", "z", "m"
+            }
+        }
+
+        buildTypes {
+            release {
+                minifyEnabled false
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            }
+        }
+
+        compileOptions {
+            sourceCompatibility=JavaVersion.VERSION_1_7
+            targetCompatibility=JavaVersion.VERSION_1_7
+        }
+
+        productFlavors {
+            arm {
+                ndk {
+                    abiFilters "armeabi", "armeabi-v7a"
+                }
+            }
+            x86 {
+                ndk {
+                    abiFilter "x86"
+                }
+            }
+        }
+    }
+
+
+    dependencies {
+        compile fileTree(dir: 'libs')
+        compile 'com.android.support:appcompat-v7:23.3.0'
+    }
